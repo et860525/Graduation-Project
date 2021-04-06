@@ -2,6 +2,19 @@
 <!DOCTYPE html>
 <html>
 
+<style>
+    table,
+    td {
+        border: 1px solid #333;
+    }
+
+    thead,
+    tfoot {
+        background-color: #333;
+        color: #fff;
+    }
+</style>
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -12,35 +25,28 @@
     <title>Find Stock</title>
 </head>
 
-<style>
-    .errorlist{
-        display: none;
-    }
-</style>
-
 <body>
     <div class="container">
-        <div class="search mt-3 text-center">
-            <h1 class="mb-4">Find Stock</h1>
-            <div class="search-area">
-                <form action="" method="POST">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <div class="form-group">
-                            
-                            {{ form.as_p }}
-                        
-                            <!--
-                            <label for="">Stock name:</label>
-                            <input type="text"
-                            class="form-control" name="stock_name" id="stock_name" placeholder="Enter your stock name...">
-                            -->                            
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
-            </div>
-        </div>
+        <h1>{{stockname}}</h1>
+
+        <table>
+            <thead>
+                <tr>
+                    {% for column in info_result.columns %}
+                        <th>{{column}}</th>        
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for key,value in info_result.iterrows %}
+                <tr>                    
+                    <td>{{value.key}}</td>
+                    <td>{{value.value}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js"
