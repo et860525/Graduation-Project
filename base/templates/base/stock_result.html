@@ -1,6 +1,15 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>Find Stock</title>
+</head>
 
 <style>
     table,
@@ -15,40 +24,70 @@
     }
 </style>
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <title>Find Stock</title>
-</head>
-
 <body>
     <div class="container">
         <h1>{{stockname}}</h1>
-
+        <div>
+            <canvas id="myChart" width="100" height="50"></canvas>
+        </div>
+        <div>
+            {{ stock_price|json_script:'stock_price' }}
+            {{ stock_date|json_script:'stock_date' }}
+        </div>
         <table>
             <thead>
                 <tr>
-                    {% for column in info_result.columns %}
-                        <th>{{column}}</th>        
-                    {% endfor %}
+                    <th>Name</th>
+                    <th>{{stockname}}</th>        
                 </tr>
             </thead>
             <tbody>
-                {% for key,value in info_result.iterrows %}
+                {% for key,value in info_result.items %}
                 <tr>                    
-                    <td>{{value.key}}</td>
-                    <td>{{value.value}}</td>
+                    <td>{{key}}</td>
+                    <td>{{value}}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // <block:setup:1>
+        var js_stock_date = JSON.parse(document.getElementById('stock_date').textContent);
+        var js_stock_price = JSON.parse(document.getElementById('stock_price').textContent);
+        var ctx = document.getElementById("myChart");
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: js_stock_date, // 換成自己的labels
+                datasets: [{
+                    label: 'stock price', 
+                    data: js_stock_price, // 換成自己的data
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        precision: 0
+                    }
+                }
+            }
+        });
+    </script>
+
+    <script>
+        // === include 'setup' then 'config' above ===
+        var ctx = document.getElementById('myChart');
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js"
         integrity="sha384-KsvD1yqQ1/1+IA7gi3P0tyJcT3vR+NdBTt13hSJ2lnve8agRGXTTyNaBYmCR/Nwi"
         crossorigin="anonymous"></script>
