@@ -1,16 +1,8 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <title>Find Stock</title>
-</head>
+{% extends 'base.html' %}
 
+{% block title %}Search Stock{% endblock %}
+
+{% block content %}
 <style>
     table,
     td {
@@ -22,18 +14,69 @@
         background-color: #333;
         color: #fff;
     }
+
+    .chart-btn button span {
+        font: bold;
+    }
+
+    .chart-btn button:hover {
+        color: #0f69ff;
+    }
 </style>
 
 <body>
     <div class="container">
-        <h1>{{stockname}}</h1>
-        <div>
-            <canvas id="myChart" width="100" height="50"></canvas>
+        <h1>{{info_result.shortName}} ({{stockname}})</h1>
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Home</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Profile</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Contact</button>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                <div class="m-3">
+                    <div class="stock-price-widget d-flex">
+                        <div class="chart-btn ms-3">
+                            <button type="button" onclick="chartBtn('1M')" class="btn"><span>1M</span></button>
+                            <button type="button" onclick="chartBtn('6M')" class="btn"><span>6M</span></button>
+                            <button type="button" onclick="chartBtn('1Y')" class="btn"><span>1Y</span></button>
+                            <button type="button" onclick="chartBtn('3Y')" class="btn"><span>3Y</span></button>
+                            <button type="button" onclick="chartBtn('5Y')" class="btn"><span>5Y</span></button>
+                        </div>
+                    </div>
+                    <!--Data-->
+                    {{ stock_price|json_script:'stock_price' }}
+                    {{ stock_date|json_script:'stock_date' }}
+                    <canvas id="myChart" width="100" height="50"></canvas>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>{{stockname}}</th>        
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for key,value in info_result.items %}
+                        <tr>                    
+                            <td>{{key}}</td>
+                            <td>{{value}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">...</div>
         </div>
-        <div>
-            {{ stock_price|json_script:'stock_price' }}
-            {{ stock_date|json_script:'stock_date' }}
-        </div>
+        
         <table>
             <thead>
                 <tr>
@@ -57,14 +100,20 @@
         // <block:setup:1>
         var js_stock_date = JSON.parse(document.getElementById('stock_date').textContent);
         var js_stock_price = JSON.parse(document.getElementById('stock_price').textContent);
+
+        /* Handle Data*/
+        // Default Data
+        var stock_date = js_stock_date;
+        var stock_price = js_stock_price;
+        
         var ctx = document.getElementById("myChart");
         var myChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: js_stock_date, // 換成自己的labels
+                labels: stock_date, // 換成自己的labels
                 datasets: [{
                     label: 'stock price', 
-                    data: js_stock_price, // 換成自己的data
+                    data: stock_price, // 換成自己的data
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.2)',
                     ],
@@ -75,25 +124,56 @@
                 }]
             },
             options: {
-                scales: {
-                    y: {
-                        precision: 0
-                    }
-                }
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                },
             }
         });
+
+    // Get chart button and return same value with setting (5y,3y,1y,6m,1m)
+    var isDate = '';
+    function chartBtn(d) {
+        switch(d){
+            case '5Y':
+                //updateData(myChart, stock_date, stock_price)
+                break;
+
+            case '1Y':
+                if(isDate != d){
+                    stock_date = []; 
+                    stock_price = [];
+                    for(let i = 0; i <= 12; i++){
+                        stock_date.unshift(js_stock_date.reverse()[i]);
+                        stock_price.unshift(js_stock_price.reverse()[i]);
+                    }
+                    console.log(stock_price);
+                    isDate = d;
+                    myChart.data.labels = stock_date;
+                    myChart.data.datasets[0].data = stock_price;
+
+                    myChart.update('active');
+                }
+                break;
+        }
+        
+    }
+
+    function updateData(chart, label, data) {
+        chart.data.labels.pop(label);
+        chart.data.datasets.forEach((dataset) => {
+            dataset.data.pop(data);
+        });
+        chart.update();
+    }
+
+
     </script>
 
     <script>
         // === include 'setup' then 'config' above ===
         var ctx = document.getElementById('myChart');
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js"
-        integrity="sha384-KsvD1yqQ1/1+IA7gi3P0tyJcT3vR+NdBTt13hSJ2lnve8agRGXTTyNaBYmCR/Nwi"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.min.js"
-        integrity="sha384-nsg8ua9HAw1y0W1btsyWgBklPnCUAFLuTMS2G72MMONqmOymq585AcH49TLBQObG"
-        crossorigin="anonymous"></script>
 </body>
 
-</html>
+{% endblock %}
