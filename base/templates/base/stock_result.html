@@ -82,15 +82,45 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // <block:setup:1>
+        /* Original Data */
         var js_stock_date = JSON.parse(document.getElementById('stock_date').textContent);
         var js_stock_price = JSON.parse(document.getElementById('stock_price').textContent);
+   
+        var stock_price = [];
+        var stock_date = [];
 
-        /* Handle Data*/
-        // Default Data
-        var stock_date = js_stock_date;
-        var stock_price = js_stock_price;
+        let stock_date_only_M = [];
+        let date_index = [];
+
+        const uniquet = (value, index, self) => {
+            return self.indexOf(value) === index
+        }
+
+        // Slice all Y-M-D to Y-M
+        for(let i = 0; i<js_stock_date.length; i++){
+            stock_date_only_M.push(js_stock_date[i].slice(0,7))
+        }
+
+        // Make Month unique
+        var stock_date_5y = stock_date_only_M.filter(uniquet)
+
+        // Use slice Date to find index of stock_price_close
+        for(let i=0; i<stock_date_5y.length; i++){
+            date_index.push(stock_date_only_M.lastIndexOf(stock_date_5y[i]))
+        }
+
+        let n = 0;
+        while (n < date_index.length){
+            stock_price.push(js_stock_price[date_index[n]])
+            n++;
+        }
+
+        // Shallow copy contain
+        stock_date = stock_date_5y.slice();
         
+
+        
+        // <block:setup:1>
         var ctx = document.getElementById("myChart");
         var myChart = new Chart(ctx, {
             type: 'line',
@@ -147,6 +177,9 @@
         
     }
 
+    
+
+
     function chartSelectDate(chart, val, _isDate){
         stock_date = []; 
         stock_price = [];
@@ -156,6 +189,8 @@
         chart.data.labels = stock_date;
         chart.data.datasets[0].data = stock_price;
 
+        console.log(stock_date);
+        console.log(stock_price);
         isDate = _isDate;
         chart.update('active');
     }
