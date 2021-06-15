@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Search Stock{% endblock %}
 
@@ -8,6 +9,14 @@
         display: none;
     }
 </style>
+
+<nav class="navbar navbar-light bg-light">
+    <div class="container">
+      <a class="navbar-brand" href="{% url 'index' %}">
+        <img src="{% static 'images/favicon.ico' %}" alt="" width="40" height="40">
+      </a>
+    </div>
+</nav>
 
 <div class="container">
     <div class="search mt-3 text-center">

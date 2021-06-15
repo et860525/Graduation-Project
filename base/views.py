@@ -37,11 +37,11 @@ def search_result(request, stockname):
 
             ## Check All Data ###
             info_result = pd.DataFrame(list(final.info.items()),columns=['key','value'])
-            print(info_result)
+            # print(info_result)
 
             ## Get Specific INFO ###
             infos = final.info
-            print(infos)
+            # print(infos)
 
             ### Get History Data ###
             stock_price = final.history(period='5y') # Get 10 year data
@@ -67,10 +67,11 @@ def search_result(request, stockname):
             return HttpResponse('<h1>{} Not Found</h1>'.format(stockname))
 
     if request.method == "POST":
-        # MODEL FORM
+        
         if form.is_valid():
             stock_name = form.cleaned_data['stock_name']
+            print(stock_name)
+            
             return redirect('stock_result', stockname=str(stock_name))
-
-    
-    return HttpResponse('<h1>Nothing</h1>')
+        else:
+            return HttpResponse('<h1>{} Not Found</h1>'.format(stockname))
