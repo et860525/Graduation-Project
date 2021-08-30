@@ -39,7 +39,11 @@ def search_result(request, stockname):
             info_result = pd.DataFrame(list(final.info.items()),columns=['key','value'])
             # print(info_result)
 
-            ## Get Specific INFO ###
+            ### Get actions ###
+            actions = final.financials
+            print(actions)
+
+            ### Get Specific INFO ###
             infos = final.info
             # print(infos)
 
