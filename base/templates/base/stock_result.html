@@ -1,340 +1,457 @@
-{% extends 'base.html' %}
-
-{% load static %}
-{% load humanize %}
-
-{% block title %}Search Stock{% endblock %}
+{% extends 'base.html' %} 
+{% load static %} 
+{% load humanize %} 
+{% block title%}Search Stock{% endblock %} 
 
 {% block content %}
 <style>
-    .font-weight-bold {
-        font-weight: bold;
-    }
+  .font-weight-bold {
+    font-weight: bold;
+  }
 
-    .setion>p {
-        margin-bottom: 0.5rem;
-    }
+  .setion > p {
+    margin-bottom: 0.5rem;
+  }
 
-    /* Chart widget */
-    .chart-btn>button {
-        background-color: #f0f0f0;
-    }
+  /* Chart widget */
+  .chart-btn > button {
+    background-color: #f0f0f0;
+  }
 
-    .chart-btn>button:hover,
-    .chart-btn>button:focus {
-        border: #6495ED 1px solid;
-    }
+  .chart-btn > button:hover,
+  .chart-btn > button:focus {
+    border: #6495ed 1px solid;
+  }
 
-    /* Navbar search */
-    form>p {
-        margin: 0px 10px;
-    }
+  /* Navbar search */
+  form > p {
+    margin: 0px 10px;
+  }
+  .ui-autocomplete {
+    max-height: 200px;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: hidden;
+  }
+  /* IE 6 doesn't support max-height
+    * we use height instead, but this forces the menu to always be this tall
+    */
+  * html .ui-autocomplete {
+    height: 100px;
+  }
 </style>
 
 <body>
-    <nav class="navbar navbar-light bg-light">
-        <div class="container-fluid justify-content-between">
-            <a class="navbar-brand" href="{% url 'index' %}">
-                <img src="{% static 'images/favicon.ico' %}" alt="" width="40" height="40">
-            </a>
-            <form class="d-flex p-2" method="POST">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button class="btn btn-outline-success" type="submit">Search</button>
-            </form>
-        </div>
-    </nav>
-    <div class="container">
-        <h1>{{ infos.longName }} ({{stockname}})</h1>
-        <ul class="nav nav-tabs" id="myTab" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button"
-                    role="tab" aria-controls="home" aria-selected="true">Home</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button"
-                    role="tab" aria-controls="profile" aria-selected="false">Profile</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="historyData-tab" data-bs-toggle="tab" data-bs-target="#historyData"
-                    type="button" role="tab" aria-controls="historyData" aria-selected="false">Historical Data</button>
-            </li>
-        </ul>
-        <div class="tab-content" id="myTabContent">
-            <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                <div class="m-3">
-                    <div class="stock-price-widget d-flex">
-                        <div class="chart-btn ms-3">
-                            <button type="button" onclick="chartBtn('1M')" class="btn"><span>1M</span></button>
-                            <button type="button" onclick="chartBtn('6M')" class="btn"><span>6M</span></button>
-                            <button type="button" onclick="chartBtn('1Y')" class="btn"><span>1Y</span></button>
-                            <button type="button" onclick="chartBtn('3Y')" class="btn"><span>3Y</span></button>
-                            <button type="button" onclick="chartBtn('5Y')" class="btn"><span>5Y</span></button>
-                        </div>
-                    </div>
-                    <!--Data-->
-                    {{ stock_price|json_script:'stock_price' }}
-                    {{ stock_date|json_script:'stock_date' }}
-                    <canvas id="myChart" width="100" height="50"></canvas>
-                </div>
-                <!--TODO Choice what infomation put under the chart-->
-                <div class="summary-info mt-4">
-                    <table class="table">
-                        <tbody>
-                            <tr>
-                                <td>Previous Close</td>
-                                <td><span class="font-weight-bold">{{ infos.previousClose }}</span></td>
-                            </tr>
-                            <tr>
-                                <td>Market Cap</td>
-                                <td><span class="font-weight-bold">{{ infos.marketCap|intcomma }}</span></td>
-                            </tr>
-                            <tr>
-                                <td>Open</td>
-                                <td><span class="font-weight-bold">{{ infos.open }}</span></td>
-                            </tr>
-                            <tr>
-                                <td>Beta</td>
-                                <td><span class="font-weight-bold">{{ infos.beta }}</span></td>
-                            </tr>
-                            <tr>
-                                <td>Volume</td>
-                                <td><span class="font-weight-bold">{{ infos.volume|intcomma }}</span></td>
-                            </tr>
-                            <tr>
-                                <td>Avg. Volume</td>
-                                <td><span class="font-weight-bold">{{ infos.averageVolume|intcomma }}</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-                <div class="container">
-                    <div class="row">
-                        <h5 class="font-weight-bold my-3">{{ infos.longName }}</h5>
-                        <div class="setion col-sm">
-                            <p>{{ infos.address1 }}</p>
-                            <p>{{ infos.city }}, {{ infos.state }} {{ infos.zip }}</p>
-                            <p>{{ infos.country }}</p>
-                        </div>
-                        <div class="setion col-sm">
-                            <p>Sector(s): <span class="font-weight-bold">{{ infos.sector }}</span></p>
-                            <p>Industry: <span class="font-weight-bold">{{ infos.industry }}</span></p>
-                            <p>Full Time Employees: <span class="font-weight-bold">{{ infos.fullTimeEmployees|intcomma}}</span></p>
-                        </div>
-                        <h3 class="mt-5 font-weight-bold">Description</h3>
-                        <p class="mt-2">{{ infos.longBusinessSummary }}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="tab-pane fade" id="historyData" role="tabpanel" aria-labelledby="historyData-tab">
-                <!-- TODO Set widget to filter historical data -->
-                <div class="historyData-widget">
-                    <div class="dropdown">
-                        <p style="display: inline-block;">Time Period:</p>
-                        <a class="dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            1year
-                        </a>
-                        <ul class="dropdown-menu chart-btn" aria-labelledby="dropdownMenuButton1">
-                            <li><a class="dropdown-item" href="#">1M</a></li>
-                            <li><a class="dropdown-item" href="#">6M</a></li>
-                            <li><a class="dropdown-item" href="#">1Y</a></li>
-                            <li><a class="dropdown-item" href="#">3Y</a></li>
-                            <li><a class="dropdown-item" href="#">5Y</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <table class="table historyTable">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Open</th>
-                            <th>High</th>
-                            <th>Low</th>
-                            <th>Close</th>
-                            <th>Volume</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for i in stock_price_all.iterrows %}
-                        <tr>
-                            <td>{{ i.1.Date }}</td>
-                            <td>{{ i.1.Open }}</td>
-                            <td>{{ i.1.High }}</td>
-                            <td>{{ i.1.Low }}</td>
-                            <td>{{ i.1.Close }}</td>
-                            <td>{{ i.1.Volume|intcomma }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-
+  <nav class="navbar navbar-light bg-light">
+    <div class="container-fluid justify-content-between">
+      <a class="navbar-brand" href="{% url 'index' %}">
+        <img
+          src="{% static 'images/favicon.ico' %}"
+          alt=""
+          width="40"
+          height="40"
+        />
+      </a>
+      <form class="d-flex p-2" method="POST">
+        {% csrf_token %} {{ form.as_p }}
+        <button class="btn btn-outline-success" type="submit">Search</button>
+      </form>
     </div>
+  </nav>
+  <div class="container">
+    <h1>{{ infos.longName }} ({{stockname}})</h1>
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link active"
+          id="home-tab"
+          data-bs-toggle="tab"
+          data-bs-target="#home"
+          type="button"
+          role="tab"
+          aria-controls="home"
+          aria-selected="true"
+        >
+          Home
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link"
+          id="profile-tab"
+          data-bs-toggle="tab"
+          data-bs-target="#profile"
+          type="button"
+          role="tab"
+          aria-controls="profile"
+          aria-selected="false"
+        >
+          Profile
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link"
+          id="historyData-tab"
+          data-bs-toggle="tab"
+          data-bs-target="#historyData"
+          type="button"
+          role="tab"
+          aria-controls="historyData"
+          aria-selected="false"
+        >
+          Historical Data
+        </button>
+      </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+      <div
+        class="tab-pane fade show active"
+        id="home"
+        role="tabpanel"
+        aria-labelledby="home-tab"
+      >
+        <div class="m-3">
+          <div class="stock-price-widget d-flex">
+            <div class="chart-btn ms-3">
+              <button type="button" onclick="chartBtn('1M')" class="btn">
+                <span>1M</span>
+              </button>
+              <button type="button" onclick="chartBtn('6M')" class="btn">
+                <span>6M</span>
+              </button>
+              <button type="button" onclick="chartBtn('1Y')" class="btn">
+                <span>1Y</span>
+              </button>
+              <button type="button" onclick="chartBtn('3Y')" class="btn">
+                <span>3Y</span>
+              </button>
+              <button type="button" onclick="chartBtn('5Y')" class="btn">
+                <span>5Y</span>
+              </button>
+            </div>
+          </div>
+          <!--Data-->
+          {{ stock_price|json_script:'stock_price' }} 
+          {{ stock_date|json_script:'stock_date' }}
+          <canvas id="myChart" width="100" height="50"></canvas>
+        </div>
+        <!--TODO Choice what information put under the chart-->
+        <div class="summary-info mt-4">
+          <table class="table">
+            <tbody>
+              <tr>
+                <td>Previous Close</td>
+                <td>
+                  <span class="font-weight-bold"
+                    >{{ infos.previousClose }}</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>Market Cap</td>
+                <td>
+                  <span class="font-weight-bold"
+                    >{{ infos.marketCap|intcomma }}</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>Open</td>
+                <td><span class="font-weight-bold">{{ infos.open }}</span></td>
+              </tr>
+              <tr>
+                <td>Beta</td>
+                <td><span class="font-weight-bold">{{ infos.beta }}</span></td>
+              </tr>
+              <tr>
+                <td>Volume</td>
+                <td>
+                  <span class="font-weight-bold"
+                    >{{ infos.volume|intcomma }}</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>Avg. Volume</td>
+                <td>
+                  <span class="font-weight-bold"
+                    >{{ infos.averageVolume|intcomma }}</span
+                  >
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div
+        class="tab-pane fade"
+        id="profile"
+        role="tabpanel"
+        aria-labelledby="profile-tab"
+      >
+        <div class="container">
+          <div class="row">
+            <h5 class="font-weight-bold my-3">{{ infos.longName }}</h5>
+            <div class="setion col-sm">
+              <p>{{ infos.address1 }}</p>
+              <p>{{ infos.city }}, {{ infos.state }} {{ infos.zip }}</p>
+              <p>{{ infos.country }}</p>
+            </div>
+            <div class="setion col-sm">
+              <p>
+                Sector(s):
+                <span class="font-weight-bold">{{ infos.sector }}</span>
+              </p>
+              <p>
+                Industry:
+                <span class="font-weight-bold">{{ infos.industry }}</span>
+              </p>
+              <p>
+                Full Time Employees:
+                <span class="font-weight-bold"
+                  >{{ infos.fullTimeEmployees|intcomma}}</span
+                >
+              </p>
+            </div>
+            <h3 class="mt-5 font-weight-bold">Description</h3>
+            <p class="mt-2">{{ infos.longBusinessSummary }}</p>
+          </div>
+        </div>
+      </div>
+      <div
+        class="tab-pane fade"
+        id="historyData"
+        role="tabpanel"
+        aria-labelledby="historyData-tab"
+      >
+        <!-- TODO Set widget to filter historical data -->
+        <div class="historyData-widget">
+          <div class="dropdown">
+            <p style="display: inline-block">Time Period:</p>
+            <a
+              class="dropdown-toggle"
+              type="button"
+              id="dropdownMenuButton1"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              1year
+            </a>
+            <ul
+              class="dropdown-menu chart-btn"
+              aria-labelledby="dropdownMenuButton1"
+            >
+              <li><a class="dropdown-item" href="#">1M</a></li>
+              <li><a class="dropdown-item" href="#">6M</a></li>
+              <li><a class="dropdown-item" href="#">1Y</a></li>
+              <li><a class="dropdown-item" href="#">3Y</a></li>
+              <li><a class="dropdown-item" href="#">5Y</a></li>
+            </ul>
+          </div>
+        </div>
+        <table class="table historyTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Open</th>
+              <th>High</th>
+              <th>Low</th>
+              <th>Close</th>
+              <th>Volume</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in stock_price_all.iterrows %}
+            <tr>
+              <td>{{ i.1.Date }}</td>
+              <td>{{ i.1.Open }}</td>
+              <td>{{ i.1.High }}</td>
+              <td>{{ i.1.Low }}</td>
+              <td>{{ i.1.Close }}</td>
+              <td>{{ i.1.Volume|intcomma }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script>
-        // TODO Controll historyTable data show
-        var rows = document.getElementsByClassName('historyTable')[0].rows[2];
-        rows.style.display = 'none'
-    </script>
-
-    <script>
-        /* Original Data */
-        var js_stock_date = JSON.parse(document.getElementById('stock_date').textContent);
-        var js_stock_price = JSON.parse(document.getElementById('stock_price').textContent);
-
-        /* Show Data */
-        var stock_price = [];
-        var stock_date = [];
-
-        /* Make date unique */
-        const uniquet = (value, index, self) => {
-            return self.indexOf(value) === index
-        }
-
-        /* Slice all Y-M-D to Y-M */
-        let stock_date_all_Month = [];
-        for (let i = 0; i < js_stock_date.length; i++) {
-            stock_date_all_Month.push(js_stock_date[i].slice(0, 7))
-        }
-
-        /* Make Month unique */
-        var stock_date_5y = stock_date_all_Month.filter(uniquet)
-
-        /* Use slice Date to find index of stock_price_close */
-        let date_index = [];
-        for (let i = 0; i < stock_date_5y.length; i++) {
-            date_index.push(stock_date_all_Month.lastIndexOf(stock_date_5y[i]))
-        }
-
-        let n = 0;
-        var stock_price_5y = [];
-        while (n < date_index.length) {
-            stock_price_5y.push(js_stock_price[date_index[n]])
-            n++;
-        }
-
-        /* Shallow copy make sure original data not change */
-        stock_date = stock_date_5y.slice();
-        stock_price = stock_price_5y.slice();
-
-        // <block:setup:1>
-        var ctx = document.getElementById("myChart");
-        var myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: stock_date, // 換成自己的labels
-                datasets: [{
-                    label: 'stock price',
-                    data: stock_price, // 換成自己的data
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                interaction: {
-                    intersect: false,
-                    mode: 'index',
-                },
-            }
+  <!-- Search bar Autocomplete -->
+  <script>
+    $( function() {
+        var availableTags = [
+            {% for stock in stock_list_Symbol %}
+                "{{ stock }}",
+            {% endfor %}
+        ];
+        $( "#id_stock_name" ).autocomplete({
+            source: availableTags
         });
+    });
+  </script>
 
-        /* Get chart button and return some value with setting (5y,3y,1y,6m,1m) */
-        var isDate = '5Y'; // Check btn press
-        function chartBtn(d) {
-            switch (d) {
-                case '5Y':
-                    if (isDate != d) {
-                        chartSelectDate(myChart, 0, d);
-                    }
-                    break;
-                case '3Y':
-                    if (isDate != d) {
-                        chartSelectDate(myChart, -38, d);
-                    }
-                    break;
-                case '1Y':
-                    if (isDate != d) {
-                        chartSelectDate(myChart, -13, d);
-                    }
-                    break;
-                case '6M':
-                    if (isDate != d) {
-                        chartSelectDate(myChart, -6, d);
-                    }
-                    break;
-                case '1M':
-                    chartData1M(myChart, d);
-                    break;
-            }
+  <!-- Historical Data Table -->
+  <script>
+    // TODO Control historyTable data show
+    var rows = document.getElementsByClassName("historyTable")[0].rows[2];
+    rows.style.display = "none";
+  </script>
 
-        }
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Chart JS -->
+  <script>
+    /* Original data from views */
+    const js_stock_date = JSON.parse(
+      document.getElementById("stock_date").textContent
+    );
+    const js_stock_price = JSON.parse(
+      document.getElementById("stock_price").textContent
+    );
 
-        /* 
+    /* Show Data */
+    var stock_price = [];
+    var stock_date = [];
+
+    /* Make date unique */
+    const uniquet = (value, index, self) => {
+      return self.indexOf(value) === index;
+    };
+
+    /* Slice all Y-M-D to Y-M */
+    let stock_date_all_Month = [];
+    for (let i = 0; i < js_stock_date.length; i++) {
+      stock_date_all_Month.push(js_stock_date[i].slice(0, 7));
+    }
+
+    /* Make Month unique */
+    var stock_date_5y = stock_date_all_Month.filter(uniquet);
+
+    /* Use slice Date to find index of stock_price_close */
+    let date_index = [];
+    for (let i = 0; i < stock_date_5y.length; i++) {
+      date_index.push(stock_date_all_Month.lastIndexOf(stock_date_5y[i]));
+    }
+
+    let n = 0;
+    var stock_price_5y = [];
+    while (n < date_index.length) {
+      stock_price_5y.push(js_stock_price[date_index[n]]);
+      n++;
+    }
+
+    /* Shallow copy make sure original data not change */
+    stock_date = stock_date_5y.slice();
+    stock_price = stock_price_5y.slice();
+
+    // <block:setup:1>
+    var ctx = document.getElementById("myChart");
+    var myChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: stock_date, // 換成自己的 labels
+        datasets: [
+          {
+            label: "stock price",
+            data: stock_price, // 換成自己的 data
+            backgroundColor: ["rgba(255, 99, 132, 0.2)"],
+            borderColor: ["rgba(255, 99, 132, 1)"],
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        interaction: {
+          intersect: false,
+          mode: "index",
+        },
+      },
+    });
+
+    /* Get chart button and return some value with setting (5y,3y,1y,6m,1m) */
+    var isDate = "5Y"; // Check btn press
+    function chartBtn(d) {
+      switch (d) {
+        case "5Y":
+          if (isDate != d) {
+            chartSelectDate(myChart, 0, d);
+          }
+          break;
+        case "3Y":
+          if (isDate != d) {
+            chartSelectDate(myChart, -38, d);
+          }
+          break;
+        case "1Y":
+          if (isDate != d) {
+            chartSelectDate(myChart, -13, d);
+          }
+          break;
+        case "6M":
+          if (isDate != d) {
+            chartSelectDate(myChart, -6, d);
+          }
+          break;
+        case "1M":
+          chartData1M(myChart, d);
+          break;
+      }
+    }
+
+    /* 
             Get data when client press btn
                 chartSelectDate(chart, val, _isDate)
                     chart: What chart select
                     val: Send how many Month
                     _isDate: check btn is presss or not
         */
-        function chartSelectDate(chart, val, _isDate) {
-            /* Reset date and price in first */
-            stock_date = [];
-            stock_price = [];
+    function chartSelectDate(chart, val, _isDate) {
+      /* Reset date and price */
+      stock_date = [];
+      stock_price = [];
 
-            /* Use shallow copy(slice function) to make original data is const. */
-            stock_date = stock_date_5y.slice(val);
-            stock_price = stock_price_5y.slice(val);
+      /* Use shallow copy(slice function) to make original data is const. */
+      stock_date = stock_date_5y.slice(val);
+      stock_price = stock_price_5y.slice(val);
 
-            /* Set up data on chart. */
-            chart.data.labels = stock_date;
+      /* Set up data on chart. */
+      chart.data.labels = stock_date;
 
-            chart.data.datasets.data = stock_price
+      chart.data.datasets.data = stock_price;
 
-            isDate = _isDate;
-            chart.update();
-        }
+      isDate = _isDate;
+      chart.update();
+    }
 
-        function chartData1M(chart, _isDate) {
-            /* Reset date and price in first */
-            stock_date = [];
-            stock_price = [];
+    function chartData1M(chart, _isDate) {
+      /* Reset date and price in first */
+      stock_date = [];
+      stock_price = [];
 
-            let stock_date_1m = [];
-            let stock_price_1m = [];
+      let stock_date_1m = [];
+      let stock_price_1m = [];
 
-            for (let i = js_stock_date.length - 1; i > (js_stock_date.length - 32); i--) {
-                stock_date_1m.push(js_stock_date[i])
-                stock_price_1m.push(js_stock_price[i])
-            }
+      for (
+        let i = js_stock_date.length - 1;
+        i > js_stock_date.length - 32;
+        i--
+      ) {
+        stock_date_1m.push(js_stock_date[i]);
+        stock_price_1m.push(js_stock_price[i]);
+      }
 
-            stock_date = stock_date_1m.slice();
-            stock_price = stock_price_1m.slice();
+      stock_date = stock_date_1m.slice();
+      stock_price = stock_price_1m.slice();
 
-            chart.data.labels = stock_date.reverse();
-            chart.data.datasets.data = stock_price.reverse();
+      chart.data.labels = stock_date.reverse();
+      chart.data.datasets.data = stock_price.reverse();
 
-            isDate = _isDate;
-            chart.update();
-        }
-
-    </script>
-
-    <script>
-        // === include 'setup' then 'config' above ===
-        var ctx = document.getElementById('myChart');
-    </script>
-
+      isDate = _isDate;
+      chart.update();
+    }
+    // === include 'setup' then 'config' above ===
+    var ctx = document.getElementById("myChart");
+  </script>
 </body>
 {% endblock %}

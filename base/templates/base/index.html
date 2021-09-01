@@ -1,44 +1,66 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'base.html' %} 
 
-{% block title %}Search Stock{% endblock %}
+{% load static %} 
+
+{% block title %}Search Stock{%endblock %} 
 
 {% block content %}
 <style>
-    .errorlist{
-        display: none;
-    }
+  .errorlist {
+    display: none;
+  }
+  .ui-autocomplete {
+    max-height: 400px;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: hidden;
+  }
+  /* IE 6 doesn't support max-height
+   * we use height instead, but this forces the menu to always be this tall
+   */
+  * html .ui-autocomplete {
+    height: 100px;
+  }
 </style>
 
 <nav class="navbar navbar-light bg-light">
-    <div class="container">
-      <a class="navbar-brand" href="{% url 'index' %}">
-        <img src="{% static 'images/favicon.ico' %}" alt="" width="40" height="40">
-      </a>
-    </div>
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'index' %}">
+      <img
+        src="{% static 'images/favicon.ico' %}"
+        alt=""
+        width="40"
+        height="40"
+      />
+    </a>
+  </div>
 </nav>
 
 <div class="container">
-    <div class="search mt-3 text-center">
-        <h1 class="mb-4">Find Stock</h1>
-        <div class="search-area">
-            <form action="" method="POST">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <div class="form-group">
-                        
-                        {{ form.as_p }}
-                    
-                        <!--
-                        <label for="">Stock name:</label>
-                        <input type="text"
-                        class="form-control" name="stock_name" id="stock_name" placeholder="Enter your stock name...">
-                        -->                            
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
+  <div class="search mt-3 text-center">
+    <h1 class="mb-4">Find Stock</h1>
+    <div class="search-area">
+      <form action="" method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+          <div class="form-group">{{ form.as_p }}</div>
         </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
     </div>
+  </div>
 </div>
+
+<script>
+  $( function() {
+    var availableTags = [
+        {% for stock in stock_list_Symbol %}
+            "{{ stock }}",
+        {% endfor %}
+    ];
+    $( "#id_stock_name" ).autocomplete({
+      source: availableTags
+    });
+  });
+</script>
 {% endblock %}
