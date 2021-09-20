@@ -232,7 +232,7 @@
             <a
               class="dropdown-toggle"
               type="button"
-              id="dropdownMenuButton1"
+              id="historicalDropMenu"
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
@@ -240,13 +240,13 @@
             </a>
             <ul
               class="dropdown-menu chart-btn"
-              aria-labelledby="dropdownMenuButton1"
+              aria-labelledby="historicalDropMenu"
             >
-              <li><a class="dropdown-item" href="#">1M</a></li>
-              <li><a class="dropdown-item" href="#">6M</a></li>
-              <li><a class="dropdown-item" href="#">1Y</a></li>
-              <li><a class="dropdown-item" href="#">3Y</a></li>
-              <li><a class="dropdown-item" href="#">5Y</a></li>
+              <li><button class="dropdown-item">1M</button></li>
+              <li><button class="dropdown-item">6M</button></li>
+              <li><button class="dropdown-item">1Y</button></li>
+              <li><button class="dropdown-item">3Y</button></li>
+              <li><button class="dropdown-item">5Y</button></li>
             </ul>
           </div>
         </div>
@@ -295,8 +295,19 @@
   <!-- Historical Data Table -->
   <script>
     // TODO Control historyTable data show
-    var rows = document.getElementsByClassName("historyTable")[0].rows[2];
-    rows.style.display = "none";
+    var s_all = [
+      {% for s in stock_price_all.iterrows %}
+        "{{ s.1.Date }}",
+      {% endfor %}
+    ];
+    let button_list = document.querySelectorAll("button.dropdown-item");
+    
+    button_list.forEach(button => {
+      button.addEventListener('click', ()=> {
+        console.log(button.textContent);
+      })
+    })
+
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -370,7 +381,7 @@
     });
 
     /* Get chart button and return some value with setting (5y,3y,1y,6m,1m) */
-    var isDate = "5Y"; // Check btn press
+    var isDate = "5Y"; // Check btn pressed or not
     function chartBtn(d) {
       switch (d) {
         case "5Y":
@@ -400,12 +411,12 @@
     }
 
     /* 
-            Get data when client press btn
-                chartSelectDate(chart, val, _isDate)
-                    chart: What chart select
-                    val: Send how many Month
-                    _isDate: check btn is presss or not
-        */
+        Get data when client press btn
+            chartSelectDate(chart, val, _isDate)
+                chart: What chart select
+                val: Send how many Month
+                _isDate: check btn is presss or not
+    */
     function chartSelectDate(chart, val, _isDate) {
       /* Reset date and price */
       stock_date = [];
