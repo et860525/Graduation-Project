@@ -242,7 +242,7 @@
               class="dropdown-menu chart-btn"
               aria-labelledby="historicalDropMenu"
             >
-              <li><button class="dropdown-item">1M</button></li>
+              <li><button class="dropdown-item">3M</button></li>
               <li><button class="dropdown-item">6M</button></li>
               <li><button class="dropdown-item">1Y</button></li>
               <li><button class="dropdown-item">3Y</button></li>
@@ -250,7 +250,7 @@
             </ul>
           </div>
         </div>
-        <table class="table historyTable">
+        <table class="table" id='historyTable'>
           <thead>
             <tr>
               <th>Date</th>
@@ -295,19 +295,90 @@
   <!-- Historical Data Table -->
   <script>
     // TODO Control historyTable data show
-    var s_all = [
-      {% for s in stock_price_all.iterrows %}
-        "{{ s.1.Date }}",
-      {% endfor %}
-    ];
-    let button_list = document.querySelectorAll("button.dropdown-item");
+    // TODO Time Period line should move with page
+
+    const historical_table = document.getElementById("historyTable");
+    var data_rows = historical_table.rows;
+
+    // Initialize first display data
+    change_historical_table(data_rows[1].cells[0].textContent.slice(0, 4), data_rows[1].cells[0].textContent.slice(5, 7) - 6);
+    document.getElementById('historicalDropMenu').textContent = '6 months';
+
+    let button_list_date = document.querySelectorAll("button.dropdown-item");
     
-    button_list.forEach(button => {
+    button_list_date.forEach(button => {
       button.addEventListener('click', ()=> {
-        console.log(button.textContent);
+        historical_time_switch(button.textContent);
       })
     })
 
+    function historical_time_switch(date) {
+      // Get historical table data
+      const historical_table = document.getElementById("historyTable");
+      let data_rows = historical_table.rows;
+      let get_today_year = data_rows[1].cells[0].textContent.slice(0, 4);
+      let get_today_month = data_rows[1].cells[0].textContent.slice(5, 7);
+
+      // When user click the button of time period (3M, 6M, 1Y, 3Y, 5Y)
+      // historical table will change.
+      let year_result = 0;
+      let month_result = 0;
+      switch (date) {
+      case '3M':
+        year_result = get_today_year;
+        month_result = get_today_month - 3;
+        change_historical_table(year_result, month_result);
+        document.getElementById('historicalDropMenu').textContent = '3 months';
+        break;
+      case '6M':
+        year_result = get_today_year;
+        month_result = get_today_month - 6;
+        change_historical_table(year_result, month_result);
+        document.getElementById('historicalDropMenu').textContent = '6 months';
+        break;
+      case '1Y':
+        year_result = get_today_year - 1;
+        month_result = get_today_month - 13;
+        change_historical_table(year_result, month_result);
+        document.getElementById('historicalDropMenu').textContent = '1 year';
+        break;
+      case '3Y':
+        year_result = get_today_year - 3;
+        month_result = get_today_month - 13;
+        change_historical_table(year_result, month_result);
+        document.getElementById('historicalDropMenu').textContent = '3 year';
+        break;
+      case '5Y':
+        for (var i=0; i<data_rows.length; i++) {
+          data_rows[i].style.display = 'table-row';
+        }
+        document.getElementById('historicalDropMenu').textContent = '5 year';
+        break;
+      }
+    }
+    
+    function change_historical_table(year_result, month_result) {
+      let set_month = 0;
+      let is_date_set_none = false;
+      
+      if (month_result <= 0) { month_result += 12; }
+      if (month_result.toString().length === 1) { month_result = '0' + month_result; }
+
+      let date_result = (year_result + "-" + month_result).toString() 
+
+      let data_rows_current_length = 0;
+      for (var i=0; i<data_rows.length; i++) {
+        if (date_result.toString() === data_rows[i].cells[0].textContent.slice(0,7)) {
+          is_date_set_none = true;
+          data_rows_current_length = i;
+          break;
+        }
+        data_rows[i].style.display = 'table-row';
+      }
+      for (var i=data_rows_current_length; i<data_rows.length; i++) {
+        data_rows[i].style.display = 'none';
+      }
+    }
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
