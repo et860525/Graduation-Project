@@ -50,9 +50,17 @@ def search_result(request, stockname):
             # print(info_result)
 
             #====================
-            # Get Specific INFO
+            # Get Specific Information
             #====================
             infos = final.info
+
+            print(final.earnings)
+            
+            #====================
+            # Get Holders
+            #====================
+            major_holders = final.major_holders
+            institutional_holders = final.institutional_holders           
 
             #=================
             # Get History Data
@@ -81,7 +89,8 @@ def search_result(request, stockname):
             
             context = {'stockname': stockname, 'infos': infos, 
                        'stock_price': stock_price_close, 'stock_date': stock_date, 'form': form, 
-                       'stock_price_all': stock_price_all, 'stock_list_Symbol': stock_list['Symbol']}
+                       'stock_price_all': stock_price_all, 'stock_list_Symbol': stock_list['Symbol'],
+                       'major_holders': major_holders, 'institutional_holders': institutional_holders}
 
             return render(request, 'base/stock_result.html', context)
         except ValueError as error:

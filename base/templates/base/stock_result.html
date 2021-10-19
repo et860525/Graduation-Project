@@ -1,539 +1,585 @@
 {% extends 'base.html' %} 
 {% load static %} 
 {% load humanize %} 
-{% block title%}Search Stock{% endblock %} 
+{% block title%}stock: {{ infos.longName }} ({{stockname}}){% endblock %} 
 
 {% block content %}
+
 <style>
-  .font-weight-bold {
-    font-weight: bold;
-  }
-
-  .setion > p {
-    margin-bottom: 0.5rem;
-  }
-
-  /* Chart widget */
-  .chart-btn > button {
-    background-color: #f0f0f0;
-  }
-
-  .chart-btn > button:hover,
-  .chart-btn > button:focus {
-    border: #6495ed 1px solid;
-  }
-
   /* Navbar search */
   form > p {
     margin: 0px 10px;
   }
-  .ui-autocomplete {
-    max-height: 200px;
-    overflow-y: auto;
-    /* prevent horizontal scrollbar */
-    overflow-x: hidden;
-  }
-  /* IE 6 doesn't support max-height
-    * we use height instead, but this forces the menu to always be this tall
-    */
-  * html .ui-autocomplete {
-    height: 100px;
-  }
 </style>
 
-<body>
-  <nav class="navbar navbar-light bg-light">
-    <div class="container-fluid justify-content-between">
-      <a class="navbar-brand" href="{% url 'index' %}">
-        <img
-          src="{% static 'images/favicon.ico' %}"
-          alt=""
-          width="40"
-          height="40"
-        />
-      </a>
-      <form class="d-flex p-2" method="POST">
-        {% csrf_token %} {{ form.as_p }}
-        <button class="btn btn-outline-success" type="submit">Search</button>
-      </form>
-    </div>
-  </nav>
-  <div class="container">
-    <h1>{{ infos.longName }} ({{stockname}})</h1>
-    <ul class="nav nav-tabs" id="myTab" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link active"
-          id="home-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#home"
-          type="button"
-          role="tab"
-          aria-controls="home"
-          aria-selected="true"
-        >
-          Chart
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link"
-          id="profile-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#profile"
-          type="button"
-          role="tab"
-          aria-controls="profile"
-          aria-selected="false"
-        >
-          Profile
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link"
-          id="historyData-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#historyData"
-          type="button"
-          role="tab"
-          aria-controls="historyData"
-          aria-selected="false"
-        >
-          Historical Data
-        </button>
-      </li>
-    </ul>
-    <div class="tab-content" id="myTabContent">
-      <div
-        class="tab-pane fade show active"
-        id="home"
-        role="tabpanel"
-        aria-labelledby="home-tab"
+<nav class="navbar navbar-light bg-light">
+  <div class="container-fluid justify-content-between">
+    <a class="navbar-brand" href="{% url 'index' %}">
+      <img
+        src="{% static 'images/favicon.ico' %}"
+        alt=""
+        width="40"
+        height="40"
+      />
+    </a>
+    <form class="d-flex p-2" method="POST">
+      {% csrf_token %} {{ form.as_p }}
+      <button class="btn btn-outline-success" type="submit">Search</button>
+    </form>
+  </div>
+</nav>
+
+<div class="container">
+  <h1>{{ infos.longName }} ({{stockname}})</h1>
+  <ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link active"
+        id="home-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#home"
+        type="button"
+        role="tab"
+        aria-controls="home"
+        aria-selected="true"
       >
-        <div class="m-3">
-          <div class="stock-price-widget d-flex">
-            <div class="chart-btn ms-3">
-              <button type="button" onclick="chartBtn('1M')" class="btn btn-outline-primary">
-                <span>1M</span>
-              </button>
-              <button type="button" onclick="chartBtn('6M')" class="btn btn-outline-primary">
-                <span>6M</span>
-              </button>
-              <button type="button" onclick="chartBtn('1Y')" class="btn btn-outline-primary">
-                <span>1Y</span>
-              </button>
-              <button type="button" onclick="chartBtn('3Y')" class="btn btn-outline-primary">
-                <span>3Y</span>
-              </button>
-              <button type="button" onclick="chartBtn('5Y')" class="btn btn-outline-primary">
-                <span>5Y</span>
-              </button>
-            </div>
+        Chart
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        id="profile-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#profile"
+        type="button"
+        role="tab"
+        aria-controls="profile"
+        aria-selected="false"
+      >
+        Profile
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        id="financials-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#financials"
+        type="button"
+        role="tab"
+        aria-controls="financials"
+        aria-selected="false"
+      >
+        Financials
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        id="historyData-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#historyData"
+        type="button"
+        role="tab"
+        aria-controls="historyData"
+        aria-selected="false"
+      >
+        Historical Data
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        id="major-holder-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#majorHolder"
+        type="button"
+        role="tab"
+        aria-controls="major-holder"
+        aria-selected="false"
+      >
+        Major Holder
+      </button>
+    </li>
+  </ul>
+  <div class="tab-content" id="myTabContent">
+    <div
+      class="tab-pane fade show active"
+      id="home"
+      role="tabpanel"
+      aria-labelledby="home-tab"
+    >
+      <div class="m-3">
+        <div class="stock-price-widget d-flex">
+          <div class="chart-btn ms-3">
+            <button type="button" onclick="chartBtn('1M')" class="btn btn-outline-primary">
+              <span>1M</span>
+            </button>
+            <button type="button" onclick="chartBtn('6M')" class="btn btn-outline-primary">
+              <span>6M</span>
+            </button>
+            <button type="button" onclick="chartBtn('1Y')" class="btn btn-outline-primary">
+              <span>1Y</span>
+            </button>
+            <button type="button" onclick="chartBtn('3Y')" class="btn btn-outline-primary">
+              <span>3Y</span>
+            </button>
+            <button type="button" onclick="chartBtn('5Y')" class="btn btn-outline-primary">
+              <span>5Y</span>
+            </button>
           </div>
-          <!--Data-->
-          {{ stock_price|json_script:'stock_price' }} 
-          {{ stock_date|json_script:'stock_date' }}
-          <canvas id="myChart" width="100" height="50"></canvas>
         </div>
-        <!--TODO Choice what information put under the chart-->
-        <div class="summary-info mt-4">
-          <table class="table">
-            <tbody>
-              <tr>
-                <td>Previous Close</td>
-                <td>
-                  <span class="font-weight-bold"
-                    >{{ infos.previousClose }}</span
-                  >
-                </td>
-              </tr>
-              <tr>
-                <td>Market Cap</td>
-                <td>
-                  <span class="font-weight-bold"
-                    >{{ infos.marketCap|intcomma }}</span
-                  >
-                </td>
-              </tr>
-              <tr>
-                <td>Open</td>
-                <td><span class="font-weight-bold">{{ infos.open }}</span></td>
-              </tr>
-              <tr>
-                <td>Beta</td>
-                <td><span class="font-weight-bold">{{ infos.beta }}</span></td>
-              </tr>
-              <tr>
-                <td>Volume</td>
-                <td>
-                  <span class="font-weight-bold"
-                    >{{ infos.volume|intcomma }}</span
-                  >
-                </td>
-              </tr>
-              <tr>
-                <td>Avg. Volume</td>
-                <td>
-                  <span class="font-weight-bold"
-                    >{{ infos.averageVolume|intcomma }}</span
-                  >
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <!--Data-->
+        {{ stock_price|json_script:'stock_price' }} 
+        {{ stock_date|json_script:'stock_date' }}
+        <canvas id="myChart" width="100" height="50"></canvas>
       </div>
-      <div
-        class="tab-pane fade"
-        id="profile"
-        role="tabpanel"
-        aria-labelledby="profile-tab"
-      >
-        <div class="container">
-          <div class="row">
-            <h5 class="font-weight-bold my-3">{{ infos.longName }}</h5>
-            <div class="setion col-sm">
-              <p>{{ infos.address1 }}</p>
-              <p>{{ infos.city }}, {{ infos.state }} {{ infos.zip }}</p>
-              <p>{{ infos.country }}</p>
-            </div>
-            <div class="setion col-sm">
-              <p>
-                Sector(s):
-                <span class="font-weight-bold">{{ infos.sector }}</span>
-              </p>
-              <p>
-                Industry:
-                <span class="font-weight-bold">{{ infos.industry }}</span>
-              </p>
-              <p>
-                Full Time Employees:
-                <span class="font-weight-bold"
-                  >{{ infos.fullTimeEmployees|intcomma}}</span
-                >
-              </p>
-            </div>
-            <h3 class="mt-5 font-weight-bold">Description</h3>
-            <p class="mt-2">{{ infos.longBusinessSummary }}</p>
-          </div>
-        </div>
-      </div>
-      <div
-        class="tab-pane fade"
-        id="historyData"
-        role="tabpanel"
-        aria-labelledby="historyData-tab"
-      >
-        <!-- TODO Set widget to filter historical data -->
-        <div class="historyData-widget">
-          <div class="dropdown">
-            <p style="display: inline-block; margin-top: 30px">Time Period:</p>
-            <a
-              class="dropdown-toggle"
-              type="button"
-              id="historicalDropMenu"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              1year
-            </a>
-            <ul
-              class="dropdown-menu chart-btn"
-              aria-labelledby="historicalDropMenu"
-            >
-              <li><button class="dropdown-item">3M</button></li>
-              <li><button class="dropdown-item">6M</button></li>
-              <li><button class="dropdown-item">1Y</button></li>
-              <li><button class="dropdown-item">3Y</button></li>
-              <li><button class="dropdown-item">5Y</button></li>
-            </ul>
-          </div>
-        </div>
-        <table class="table" id='historyTable'>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Open</th>
-              <th>High</th>
-              <th>Low</th>
-              <th>Close</th>
-              <th>Volume</th>
-            </tr>
-          </thead>
+      <!--TODO Choice what information put under the chart-->
+      <div class="summary-info mt-4">
+        <table class="table">
           <tbody>
-            {% for i in stock_price_all.iterrows %}
             <tr>
-              <td>{{ i.1.Date }}</td>
-              <td>{{ i.1.Open }}</td>
-              <td>{{ i.1.High }}</td>
-              <td>{{ i.1.Low }}</td>
-              <td>{{ i.1.Close }}</td>
-              <td>{{ i.1.Volume|intcomma }}</td>
+              <td>Previous Close</td>
+              <td>
+                <span class="font-weight-bold"
+                  >{{ infos.previousClose }}</span
+                >
+              </td>
             </tr>
-            {% endfor %}
+            <tr>
+              <td>Market Cap</td>
+              <td>
+                <span class="font-weight-bold"
+                  >{{ infos.marketCap|intcomma }}</span
+                >
+              </td>
+            </tr>
+            <tr>
+              <td>Open</td>
+              <td><span class="font-weight-bold">{{ infos.open }}</span></td>
+            </tr>
+            <tr>
+              <td>Beta</td>
+              <td><span class="font-weight-bold">{{ infos.beta }}</span></td>
+            </tr>
+            <tr>
+              <td>Volume</td>
+              <td>
+                <span class="font-weight-bold"
+                  >{{ infos.volume|intcomma }}</span
+                >
+              </td>
+            </tr>
+            <tr>
+              <td>Avg. Volume</td>
+              <td>
+                <span class="font-weight-bold"
+                  >{{ infos.averageVolume|intcomma }}</span
+                >
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
     </div>
+    <div
+      class="tab-pane fade"
+      id="profile"
+      role="tabpanel"
+      aria-labelledby="profile-tab"
+    >
+      <div class="container">
+        <div class="row">
+          <h5 class="font-weight-bold my-3">{{ infos.longName }}</h5>
+          <div class="setion col-sm">
+            <p>{{ infos.address1 }}</p>
+            <p>{{ infos.city }}, {{ infos.state }} {{ infos.zip }}</p>
+            <p>{{ infos.country }}</p>
+          </div>
+          <div class="setion col-sm">
+            <p>
+              Sector(s):
+              <span class="font-weight-bold">{{ infos.sector }}</span>
+            </p>
+            <p>
+              Industry:
+              <span class="font-weight-bold">{{ infos.industry }}</span>
+            </p>
+            <p>
+              Full Time Employees:
+              <span class="font-weight-bold"
+                >{{ infos.fullTimeEmployees|intcomma}}</span
+              >
+            </p>
+          </div>
+          <h3 class="mt-5 font-weight-bold">Description</h3>
+          <p class="mt-2">{{ infos.longBusinessSummary }}</p>
+        </div>
+      </div>
+    </div>
+    <div
+      class="tab-pane fade"
+      id="historyData"
+      role="tabpanel"
+      aria-labelledby="historyData-tab"
+    >
+      <!-- TODO Set widget to filter historical data -->
+      <div class="historyData-widget">
+        <div class="dropdown">
+          <p style="display: inline-block; margin-top: 30px">Time Period:</p>
+          <a
+            class="dropdown-toggle"
+            type="button"
+            id="historicalDropMenu"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            1year
+          </a>
+          <ul
+            class="dropdown-menu chart-btn"
+            aria-labelledby="historicalDropMenu"
+          >
+            <li><button class="dropdown-item">3M</button></li>
+            <li><button class="dropdown-item">6M</button></li>
+            <li><button class="dropdown-item">1Y</button></li>
+            <li><button class="dropdown-item">3Y</button></li>
+            <li><button class="dropdown-item">5Y</button></li>
+          </ul>
+        </div>
+      </div>
+      <table class="table" id='historyTable'>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Open</th>
+            <th>High</th>
+            <th>Low</th>
+            <th>Close</th>
+            <th>Volume</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in stock_price_all.iterrows %}
+          <tr>
+            <td>{{ i.1.Date }}</td>
+            <td>{{ i.1.Open }}</td>
+            <td>{{ i.1.High }}</td>
+            <td>{{ i.1.Low }}</td>
+            <td>{{ i.1.Close }}</td>
+            <td>{{ i.1.Volume|intcomma }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="tab-pane fade" id="majorHolder" role="tabpanel" aria-labelledby="major-holder-tab">
+      <table class="table table-striped">
+        <thead>
+          <h4>Major Holders</h4>
+        </thead>
+        <tbody>
+          {% for i in major_holders.iterrows %}
+          <tr>
+            <td>{{ i.1.0 }}</td>
+            <td>{{ i.1.1 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <table class="table table-striped">
+        <h4>Major Holders</h4>
+        <thead>
+          <tr>
+            <th scope="col">Holder</th>
+            <th scope="col">Shares</th>
+            <th scope="col">Date Reported	</th>
+            <th scope="col">Out</th>
+            <th scope="col">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in institutional_holders.iterrows %}
+          <tr>
+            <td>{{ i.1.0 }}</td>
+            <td>{{ i.1.1|intcomma }}</td>
+            <td>{{ i.1.2 }}</td>
+            <td>{{ i.1.3|floatformat:4 }}</td>
+            <td>{{ i.1.4|intcomma }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="tab-pane fade" id="financials" role="tabpanel" aria-labelledby="financials-tab">
+      <table class="table table-striped">
+        <thead>
+          <h4>financials</h4>
+        </thead>
+        <tbody>
+
+        </tbody>
+      </table>
+    </div>
   </div>
+</div>
 
-  <!-- Search bar Autocomplete -->
-  <script>
-    $( function() {
-        var availableTags = [
-            {% for stock in stock_list_Symbol %}
-                "{{ stock }}",
-            {% endfor %}
-        ];
-        $( "#id_stock_name" ).autocomplete({
-            source: availableTags
-        });
-    });
-  </script>
+<!-- Search bar Autocomplete -->
+<script>
+  $( function() {
+      var availableTags = [
+          {% for stock in stock_list_Symbol %}
+              "{{ stock }}",
+          {% endfor %}
+      ];
+      $( "#id_stock_name" ).autocomplete({
+          source: availableTags
+      });
+  });
+</script>
 
-  <!-- Historical Data Table -->
-  <script>
-    // TODO Control historyTable data show
-    // TODO Time Period line should move with page
+<!-- Historical Data Table -->
+<script>
+  // TODO Control historyTable data show
+  // TODO Time Period line should move with page
 
-    const historical_table = document.getElementById("historyTable");
-    var data_rows = historical_table.rows;
+  const historical_table = document.getElementById("historyTable");
+  var data_rows = historical_table.rows;
 
-    // Initialize first display data
-    change_historical_table(data_rows[1].cells[0].textContent.slice(0, 4), data_rows[1].cells[0].textContent.slice(5, 7) - 6);
-    document.getElementById('historicalDropMenu').textContent = '6 months';
+  // Initialize first display data
+  change_historical_table(data_rows[1].cells[0].textContent.slice(0, 4), data_rows[1].cells[0].textContent.slice(5, 7) - 6);
+  document.getElementById('historicalDropMenu').textContent = '6 months';
 
-    let button_list_date = document.querySelectorAll("button.dropdown-item");
-    
-    button_list_date.forEach(button => {
-      button.addEventListener('click', ()=> {
-        historical_time_switch(button.textContent);
-      })
+  let button_list_date = document.querySelectorAll("button.dropdown-item");
+  
+  button_list_date.forEach(button => {
+    button.addEventListener('click', ()=> {
+      historical_time_switch(button.textContent);
     })
+  })
 
-    function historical_time_switch(date) {
-      // Get historical table data
-      const historical_table = document.getElementById("historyTable");
-      let data_rows = historical_table.rows;
-      let get_today_year = data_rows[1].cells[0].textContent.slice(0, 4);
-      let get_today_month = data_rows[1].cells[0].textContent.slice(5, 7);
+  function historical_time_switch(date) {
+    // Get historical table data
+    const historical_table = document.getElementById("historyTable");
+    let data_rows = historical_table.rows;
+    let get_today_year = data_rows[1].cells[0].textContent.slice(0, 4);
+    let get_today_month = data_rows[1].cells[0].textContent.slice(5, 7);
 
-      // When user click the button of time period (3M, 6M, 1Y, 3Y, 5Y)
-      // historical table will change.
-      let year_result = 0;
-      let month_result = 0;
-      switch (date) {
-      case '3M':
-        year_result = get_today_year;
-        month_result = get_today_month - 3;
-        change_historical_table(year_result, month_result);
-        document.getElementById('historicalDropMenu').textContent = '3 months';
-        break;
-      case '6M':
-        year_result = get_today_year;
-        month_result = get_today_month - 6;
-        change_historical_table(year_result, month_result);
-        document.getElementById('historicalDropMenu').textContent = '6 months';
-        break;
-      case '1Y':
-        year_result = get_today_year - 1;
-        month_result = get_today_month - 13;
-        change_historical_table(year_result, month_result);
-        document.getElementById('historicalDropMenu').textContent = '1 year';
-        break;
-      case '3Y':
-        year_result = get_today_year - 3;
-        month_result = get_today_month - 13;
-        change_historical_table(year_result, month_result);
-        document.getElementById('historicalDropMenu').textContent = '3 year';
-        break;
-      case '5Y':
-        for (var i=0; i<data_rows.length; i++) {
-          data_rows[i].style.display = 'table-row';
-        }
-        document.getElementById('historicalDropMenu').textContent = '5 year';
-        break;
-      }
-    }
-    
-    function change_historical_table(year_result, month_result) {
-      let set_month = 0;
-      let is_date_set_none = false;
-      
-      if (month_result <= 0) { month_result += 12; }
-      if (month_result.toString().length === 1) { month_result = '0' + month_result; }
-
-      let date_result = (year_result + "-" + month_result).toString() 
-
-      let data_rows_current_length = 0;
+    // When user click the button of time period (3M, 6M, 1Y, 3Y, 5Y)
+    // historical table will change.
+    let year_result = 0;
+    let month_result = 0;
+    switch (date) {
+    case '3M':
+      year_result = get_today_year;
+      month_result = get_today_month - 3;
+      change_historical_table(year_result, month_result);
+      document.getElementById('historicalDropMenu').textContent = '3 months';
+      break;
+    case '6M':
+      year_result = get_today_year;
+      month_result = get_today_month - 6;
+      change_historical_table(year_result, month_result);
+      document.getElementById('historicalDropMenu').textContent = '6 months';
+      break;
+    case '1Y':
+      year_result = get_today_year - 1;
+      month_result = get_today_month - 13;
+      change_historical_table(year_result, month_result);
+      document.getElementById('historicalDropMenu').textContent = '1 year';
+      break;
+    case '3Y':
+      year_result = get_today_year - 3;
+      month_result = get_today_month - 13;
+      change_historical_table(year_result, month_result);
+      document.getElementById('historicalDropMenu').textContent = '3 year';
+      break;
+    case '5Y':
       for (var i=0; i<data_rows.length; i++) {
-        if (date_result.toString() === data_rows[i].cells[0].textContent.slice(0,7)) {
-          is_date_set_none = true;
-          data_rows_current_length = i;
-          break;
-        }
         data_rows[i].style.display = 'table-row';
       }
-      for (var i=data_rows_current_length; i<data_rows.length; i++) {
-        data_rows[i].style.display = 'none';
+      document.getElementById('historicalDropMenu').textContent = '5 year';
+      break;
+    }
+  }
+  
+  function change_historical_table(year_result, month_result) {
+    let set_month = 0;
+    let is_date_set_none = false;
+    
+    if (month_result <= 0) { month_result += 12; }
+    if (month_result.toString().length === 1) { month_result = '0' + month_result; }
+
+    let date_result = (year_result + "-" + month_result).toString() 
+
+    let data_rows_current_length = 0;
+    for (var i=0; i<data_rows.length; i++) {
+      if (date_result.toString() === data_rows[i].cells[0].textContent.slice(0,7)) {
+        is_date_set_none = true;
+        data_rows_current_length = i;
+        break;
       }
+      data_rows[i].style.display = 'table-row';
     }
-  </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Chart JS -->
-  <script>
-    /* Original data from views */
-    const js_stock_date = JSON.parse(
-      document.getElementById("stock_date").textContent
-    );
-    const js_stock_price = JSON.parse(
-      document.getElementById("stock_price").textContent
-    );
-
-    /* Show Data */
-    var stock_price = [];
-    var stock_date = [];
-
-    /* Make date unique */
-    const uniquet = (value, index, self) => {
-      return self.indexOf(value) === index;
-    };
-
-    /* Slice all Y-M-D to Y-M */
-    let stock_date_all_Month = [];
-    for (let i = 0; i < js_stock_date.length; i++) {
-      stock_date_all_Month.push(js_stock_date[i].slice(0, 7));
+    for (var i=data_rows_current_length; i<data_rows.length; i++) {
+      data_rows[i].style.display = 'none';
     }
+  }
+</script>
 
-    /* Make Month unique */
-    var stock_date_5y = stock_date_all_Month.filter(uniquet);
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Chart JS -->
+<script>
+  /* Original data from views */
+  const js_stock_date = JSON.parse(
+    document.getElementById("stock_date").textContent
+  );
+  const js_stock_price = JSON.parse(
+    document.getElementById("stock_price").textContent
+  );
 
-    /* Use slice Date to find index of stock_price_close */
-    let date_index = [];
-    for (let i = 0; i < stock_date_5y.length; i++) {
-      date_index.push(stock_date_all_Month.lastIndexOf(stock_date_5y[i]));
-    }
+  /* Show Data */
+  var stock_price = [];
+  var stock_date = [];
 
-    let n = 0;
-    var stock_price_5y = [];
-    while (n < date_index.length) {
-      stock_price_5y.push(js_stock_price[date_index[n]]);
-      n++;
-    }
+  /* Make date unique */
+  const uniquet = (value, index, self) => {
+    return self.indexOf(value) === index;
+  };
 
-    /* Shallow copy make sure original data not change */
-    stock_date = stock_date_5y.slice();
-    stock_price = stock_price_5y.slice();
+  /* Slice all Y-M-D to Y-M */
+  let stock_date_all_Month = [];
+  for (let i = 0; i < js_stock_date.length; i++) {
+    stock_date_all_Month.push(js_stock_date[i].slice(0, 7));
+  }
 
-    // <block:setup:1>
-    var ctx = document.getElementById("myChart");
-    var myChart = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: stock_date, // 換成自己的 labels
-        datasets: [
-          {
-            label: "stock price",
-            data: stock_price, // 換成自己的 data
-            backgroundColor: ["rgba(255, 99, 132, 0.2)"],
-            borderColor: ["rgba(255, 99, 132, 1)"],
-            borderWidth: 1,
-          },
-        ],
-      },
-      options: {
-        interaction: {
-          intersect: false,
-          mode: "index",
+  /* Make Month unique */
+  var stock_date_5y = stock_date_all_Month.filter(uniquet);
+
+  /* Use slice Date to find index of stock_price_close */
+  let date_index = [];
+  for (let i = 0; i < stock_date_5y.length; i++) {
+    date_index.push(stock_date_all_Month.lastIndexOf(stock_date_5y[i]));
+  }
+
+  let n = 0;
+  var stock_price_5y = [];
+  while (n < date_index.length) {
+    stock_price_5y.push(js_stock_price[date_index[n]]);
+    n++;
+  }
+
+  /* Shallow copy make sure original data not change */
+  stock_date = stock_date_5y.slice();
+  stock_price = stock_price_5y.slice();
+
+  // <block:setup:1>
+  var ctx = document.getElementById("myChart");
+  var myChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: stock_date, // 換成自己的 labels
+      datasets: [
+        {
+          label: "stock price",
+          data: stock_price, // 換成自己的 data
+          backgroundColor: ["rgba(255, 99, 132, 0.2)"],
+          borderColor: ["rgba(255, 99, 132, 1)"],
+          borderWidth: 1,
         },
+      ],
+    },
+    options: {
+      interaction: {
+        intersect: false,
+        mode: "index",
       },
-    });
+    },
+  });
 
-    /* Get chart button and return some value with setting (5y,3y,1y,6m,1m) */
-    var isDate = "5Y"; // Check btn pressed or not
-    function chartBtn(d) {
-      switch (d) {
-        case "5Y":
-          if (isDate != d) {
-            chartSelectDate(myChart, 0, d);
-          }
-          break;
-        case "3Y":
-          if (isDate != d) {
-            chartSelectDate(myChart, -38, d);
-          }
-          break;
-        case "1Y":
-          if (isDate != d) {
-            chartSelectDate(myChart, -13, d);
-          }
-          break;
-        case "6M":
-          if (isDate != d) {
-            chartSelectDate(myChart, -6, d);
-          }
-          break;
-        case "1M":
-          chartData1M(myChart, d);
-          break;
-      }
+  /* Get chart button and return some value with setting (5y,3y,1y,6m,1m) */
+  var isDate = "5Y"; // Check btn pressed or not
+  function chartBtn(d) {
+    switch (d) {
+      case "5Y":
+        if (isDate != d) {
+          chartSelectDate(myChart, 0, d);
+        }
+        break;
+      case "3Y":
+        if (isDate != d) {
+          chartSelectDate(myChart, -38, d);
+        }
+        break;
+      case "1Y":
+        if (isDate != d) {
+          chartSelectDate(myChart, -13, d);
+        }
+        break;
+      case "6M":
+        if (isDate != d) {
+          chartSelectDate(myChart, -6, d);
+        }
+        break;
+      case "1M":
+        chartData1M(myChart, d);
+        break;
+    }
+  }
+
+  /* 
+      Get data when client press btn
+          chartSelectDate(chart, val, _isDate)
+              chart: What chart select
+              val: Send how many Month
+              _isDate: check btn is presss or not
+  */
+  function chartSelectDate(chart, val, _isDate) {
+    /* Reset date and price */
+    stock_date = [];
+    stock_price = [];
+
+    /* Use shallow copy(slice function) to make original data is const. */
+    stock_date = stock_date_5y.slice(val);
+    stock_price = stock_price_5y.slice(val);
+
+    /* Set up data on chart. */
+    chart.data.labels = stock_date;
+
+    chart.data.datasets.data = stock_price;
+
+    isDate = _isDate;
+    chart.update();
+  }
+
+  function chartData1M(chart, _isDate) {
+    /* Reset date and price in first */
+    stock_date = [];
+    stock_price = [];
+
+    let stock_date_1m = [];
+    let stock_price_1m = [];
+
+    for (
+      let i = js_stock_date.length - 1;
+      i > js_stock_date.length - 32;
+      i--
+    ) {
+      stock_date_1m.push(js_stock_date[i]);
+      stock_price_1m.push(js_stock_price[i]);
     }
 
-    /* 
-        Get data when client press btn
-            chartSelectDate(chart, val, _isDate)
-                chart: What chart select
-                val: Send how many Month
-                _isDate: check btn is presss or not
-    */
-    function chartSelectDate(chart, val, _isDate) {
-      /* Reset date and price */
-      stock_date = [];
-      stock_price = [];
+    stock_date = stock_date_1m.slice();
+    stock_price = stock_price_1m.slice();
 
-      /* Use shallow copy(slice function) to make original data is const. */
-      stock_date = stock_date_5y.slice(val);
-      stock_price = stock_price_5y.slice(val);
+    chart.data.labels = stock_date.reverse();
+    chart.data.datasets.data = stock_price.reverse();
 
-      /* Set up data on chart. */
-      chart.data.labels = stock_date;
-
-      chart.data.datasets.data = stock_price;
-
-      isDate = _isDate;
-      chart.update();
-    }
-
-    function chartData1M(chart, _isDate) {
-      /* Reset date and price in first */
-      stock_date = [];
-      stock_price = [];
-
-      let stock_date_1m = [];
-      let stock_price_1m = [];
-
-      for (
-        let i = js_stock_date.length - 1;
-        i > js_stock_date.length - 32;
-        i--
-      ) {
-        stock_date_1m.push(js_stock_date[i]);
-        stock_price_1m.push(js_stock_price[i]);
-      }
-
-      stock_date = stock_date_1m.slice();
-      stock_price = stock_price_1m.slice();
-
-      chart.data.labels = stock_date.reverse();
-      chart.data.datasets.data = stock_price.reverse();
-
-      isDate = _isDate;
-      chart.update();
-    }
-    // === include 'setup' then 'config' above ===
-    var ctx = document.getElementById("myChart");
-  </script>
-</body>
+    isDate = _isDate;
+    chart.update();
+  }
+  // === include 'setup' then 'config' above ===
+  var ctx = document.getElementById("myChart");
+</script>
 {% endblock %}
