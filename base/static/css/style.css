@@ -76,3 +76,11 @@ body {
 .chart-btn > button:focus {
   border: #6495ed 1px solid;
 }
+
+@keyframes historyData-refresh {
+  0% {background: #fff;}
+  100% {background: #eee;}
+}
+.historyData-refresh {
+  animation: historyData-refresh 1s ease-out;
+}	

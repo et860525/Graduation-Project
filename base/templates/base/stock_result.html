@@ -12,6 +12,7 @@
   }
 </style>
 
+<!-- NavBar -->
 <nav class="navbar navbar-light bg-light">
   <div class="container-fluid justify-content-between">
     <a class="navbar-brand" href="{% url 'index' %}">
@@ -29,8 +30,10 @@
   </div>
 </nav>
 
+<!-- Stock -->
 <div class="container">
   <h1>{{ infos.longName }} ({{stockname}})</h1>
+  <!-- Tabs System -->
   <ul class="nav nav-tabs" id="myTab" role="tablist">
     <li class="nav-item" role="presentation">
       <button
@@ -356,6 +359,11 @@
   button_list_date.forEach(button => {
     button.addEventListener('click', ()=> {
       historical_time_switch(button.textContent);
+      // historyData refresh
+      document.getElementById('historyData').classList.add('historyData-refresh');
+      setTimeout(() => {
+          document.getElementById('historyData').classList.remove('historyData-refresh');
+      }, 1000)
     })
   })
 
