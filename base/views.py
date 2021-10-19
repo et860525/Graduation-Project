@@ -1,3 +1,4 @@
+from os import sep
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 import yfinance as yf
@@ -20,9 +21,8 @@ def index(request):
             return redirect('stock_result', stockname=str(stock_name))
 
     stock_list = pd.read_csv('nasdaq_screener.csv')
-    # print(stock_list[['Symbol', 'Name']])
 
-    return render(request, 'base/index.html', {'form': form, 'stock_list_Symbol': stock_list['Symbol']})
+    return render(request, 'base/index.html', {'form': form, 'stock_list_Symbol': stock_list['Symbol'] + ', ' + stock_list['Name']})
 
 def search_result(request, stockname):
     form = StockSearch(request.POST)
@@ -38,7 +38,8 @@ def search_result(request, stockname):
             return HttpResponse('<h1>{} Not Found</h1>'.format(stockname))
 
     if request.method == "GET":
-        final = yf.Ticker(stockname)
+        stockname = stockname.split(',')
+        final = yf.Ticker(stockname[0])
         stock_price_close = []
         stock_date = []
         try:
@@ -87,7 +88,7 @@ def search_result(request, stockname):
                 stock_price_close.append(close)
                 stock_date.append(date)  # get Y-M-D
             
-            context = {'stockname': stockname, 'infos': infos, 
+            context = {'stockname': stockname[0], 'infos': infos, 
                        'stock_price': stock_price_close, 'stock_date': stock_date, 'form': form, 
                        'stock_price_all': stock_price_all, 'stock_list_Symbol': stock_list['Symbol'],
                        'major_holders': major_holders, 'institutional_holders': institutional_holders}
