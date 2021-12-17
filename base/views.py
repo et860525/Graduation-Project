@@ -53,7 +53,7 @@ def search_result(request, stockname):
             infos = final.info
 
             # ====================
-            # Get Specific Information
+            # Get Earnings
             # ====================
             earnings_date = []
             earnings = final.earnings

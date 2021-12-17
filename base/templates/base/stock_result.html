@@ -46,8 +46,8 @@
         aria-controls="home"
         aria-selected="true"
       >
-      <!-- 圖表 -->
-        Chart
+      <!-- 圖表 Chart -->
+        圖表
       </button>
     </li>
     <li class="nav-item" role="presentation">
@@ -61,8 +61,8 @@
         aria-controls="profile"
         aria-selected="false"
       >
-      <!-- 簡介 -->
-        Profile
+      <!-- 簡介 Profile -->
+        簡介
       </button>
     </li>
     <li class="nav-item" role="presentation">
@@ -76,8 +76,8 @@
         aria-controls="financials"
         aria-selected="false"
       >
-      <!-- 金融 -->
-        Financials
+      <!-- 金融資料 Financials -->
+        金融資料
       </button>
     </li>
     <li class="nav-item" role="presentation">
@@ -91,8 +91,8 @@
         aria-controls="historyData"
         aria-selected="false"
       >
-      <!-- 歷史資料 -->
-        Historical Data
+      <!-- 歷史資料 Historical Data -->
+        歷史資料
       </button>
     </li>
     <li class="nav-item" role="presentation">
@@ -106,8 +106,8 @@
         aria-controls="major-holder"
         aria-selected="false"
       >
-      <!-- 主要持有者 -->
-        Major Holder
+      <!-- 主要持有者 Major Holder -->
+        主要持有者
       </button>
     </li>
   </ul>
@@ -143,13 +143,12 @@
         {{ stock_date|json_script:'stock_date' }}
         <canvas id="myChart" width="100" height="50"></canvas>
       </div>
-      <!--TODO Choice what information put under the chart-->
       <div class="summary-info mt-4">
         <table class="table">
           <tbody>
             <tr>
-              <!-- 昨收 -->
-              <td>Previous Close</td> 
+              <!-- 昨收 Previous Close -->
+              <td class="font-weight-bold">昨收</td> 
               <td>
                 <span class="font-weight-bold"
                   >{{ infos.previousClose }}</span
@@ -157,8 +156,8 @@
               </td>
             </tr>
             <tr>
-              <!-- 市值 -->
-              <td>Market Cap</td>
+              <!-- 市值 Market Cap -->
+              <td class="font-weight-bold">市值</td>
               <td>
                 <span class="font-weight-bold"
                   >{{ infos.marketCap|intcomma }}</span
@@ -166,17 +165,17 @@
               </td>
             </tr>
             <tr>
-              <!-- 開盤 -->
-              <td>Open</td>
+              <!-- 開盤 Open -->
+              <td class="font-weight-bold">開盤</td>
               <td><span class="font-weight-bold">{{ infos.open }}</span></td>
             </tr>
             <tr>
-              <td>Beta</td>
+              <td class="font-weight-bold">Beta值</td>
               <td><span class="font-weight-bold">{{ infos.beta }}</span></td>
             </tr>
             <tr>
-              <!-- 成交量 -->
-              <td>Volume</td>
+              <!-- 成交量 Volume -->
+              <td class="font-weight-bold">成交量</td>
               <td>
                 <span class="font-weight-bold"
                   >{{ infos.volume|intcomma }}</span
@@ -184,8 +183,8 @@
               </td>
             </tr>
             <tr>
-              <!-- 平均成交量 -->
-              <td>Avg. Volume</td>
+              <!-- 平均成交量 Avg. Volume -->
+              <td class="font-weight-bold">平均成交量</td>
               <td>
                 <span class="font-weight-bold"
                   >{{ infos.averageVolume|intcomma }}</span
@@ -206,27 +205,31 @@
         <div class="row">
           <h5 class="font-weight-bold my-3">{{ infos.longName }}</h5>
           <div class="setion col-sm">
+            <p>地址: </p>
             <p>{{ infos.address1 }}</p>
             <p>{{ infos.city }}, {{ infos.state }} {{ infos.zip }}</p>
             <p>{{ infos.country }}</p>
           </div>
           <div class="setion col-sm">
             <p>
-              Sector(s):
+              <!-- Sector(s): -->
+              產業: 
               <span class="font-weight-bold">{{ infos.sector }}</span>
             </p>
             <p>
-              Industry:
+              <!-- Industry: -->
+              行業: 
               <span class="font-weight-bold">{{ infos.industry }}</span>
             </p>
             <p>
-              Full Time Employees:
+              <!-- Full Time Employees: -->
+              員工人數: 
               <span class="font-weight-bold"
                 >{{ infos.fullTimeEmployees|intcomma}}</span
               >
             </p>
           </div>
-          <h3 class="mt-5 font-weight-bold">Description</h3>
+          <h3 class="mt-5 font-weight-bold">公司摘要</h3>
           <p class="mt-2">{{ infos.longBusinessSummary }}</p>
         </div>
       </div>
@@ -237,10 +240,9 @@
       role="tabpanel"
       aria-labelledby="historyData-tab"
     >
-      <!-- TODO Set widget to filter historical data -->
       <div class="historyData-widget">
         <div class="dropdown">
-          <p style="display: inline-block; margin-top: 30px">Time Period:</p>
+          <p style="display: inline-block; margin-top: 30px">時間區間:</p>
           <a
             class="dropdown-toggle"
             type="button"
@@ -265,18 +267,18 @@
       <table class="table" id='historyTable'>
         <thead>
           <tr>
-            <!-- 時間 -->
-            <th>Date</th>
-            <!-- 開盤 -->
-            <th>Open</th>
-            <!-- 最高 -->
-            <th>High</th>
-            <!-- 最低 -->
-            <th>Low</th>
-            <!-- 關盤 -->
-            <th>Close</th>
-            <!-- 交易量 -->
-            <th>Volume</th>
+            <!-- Date -->
+            <th>日期</th>
+            <!-- Open -->
+            <th>開盤</th>
+            <!-- High -->
+            <th>最高</th>
+            <!-- Low -->
+            <th>最低</th>
+            <!-- Close -->
+            <th>關盤</th>
+            <!-- Volume -->
+            <th>交易量</th>
           </tr>
         </thead>
         <tbody>
@@ -296,8 +298,8 @@
     <div class="tab-pane fade" id="majorHolder" role="tabpanel" aria-labelledby="major-holder-tab">
       <table class="table table-striped">
         <thead>
-          <!-- 主要持有者 -->
-          <h3>Major Holders</h3>
+          <!-- 主要持有者 Major Holders -->
+          <h3>主要持有者</h3>
         </thead>
         <tbody>
           {% for i in major_holders.iterrows %}
@@ -309,15 +311,20 @@
         </tbody>
       </table>
       <table class="table table-striped">
-        <!-- 機構持有者 -->
-        <h3>Institutional Holders</h3>
+        <!-- 機構持有者 Institutional Holders -->
+        <h3>機構持有者</h3>
         <thead>
           <tr>
-            <th scope="col">Holder</th>
-            <th scope="col">Shares</th>
-            <th scope="col">Date Reported	</th>
-            <th scope="col">Out</th>
-            <th scope="col">Value</th>
+            <!-- Holder -->
+            <th scope="col">持有者</th> 
+            <!-- Shares -->
+            <th scope="col">份額</th>
+            <!-- Date Reported -->
+            <th scope="col">報告日</th>
+            <!-- Out -->
+            <th scope="col">占比</th>
+            <!-- Value -->
+            <th scope="col">價值</th>
           </tr>
         </thead>
         <tbody>
@@ -363,6 +370,7 @@
 </div>
 
 <!-- Search bar Autocomplete -->
+<!-- 自動填入的資料選項 -->
 <script>
   $( function() {
       var availableTags = [
@@ -377,6 +385,7 @@
 </script>
 
 <!-- Historical Data Table -->
+<!-- 顯示歷史價錢資料 -->
 <script>
   // TODO Control historyTable data show
   // TODO Time Period line should move with page
@@ -472,6 +481,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <!-- Chart JS for Main Chart -->
+<!-- 主要的圖表顯示 -->
 <script>
   /* Original data from views */
   const js_stock_date = JSON.parse(
@@ -653,14 +663,14 @@
       labels: earnings_date, // 換成自己的 labels
       datasets: [
         {
-          label: "Revenue",
+          label: "收益",
           data: revenue, // 換成自己的 data
           backgroundColor: 'rgb(255, 99, 132)',
           borderColor: 'rgb(255, 99, 132)',
           borderWidth: 1,
         },
         {
-          label: "Earnings",
+          label: "利潤",
           data: earnings, // 換成自己的 data
           backgroundColor: ["blue"],
           borderColor: ["blue"],
